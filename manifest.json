@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "Sakura Stream",
+  "version": "1.6.3",
+  "minimum_chrome_version": "116",
+  "description": "Sakura Stream — радиоплеер с любыми потоками, фоновым воспроизведением, названиями треков и красивыми темами.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Sakura Stream",
+    "default_icon": {
+      "16": "icon16.png",
+      "32": "icon32.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "permissions": [
+    "storage",
+    "offscreen",
+    "declarativeNetRequest",
+    "clipboardWrite",
+    "alarms"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icon16.png",
+    "32": "icon32.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}

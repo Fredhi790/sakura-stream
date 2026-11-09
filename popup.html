@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Sakura Stream</title>
+  <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="effects.css">
+</head>
+<body>
+  <div id="fx" class="fx"></div>
+  <button id="restoreInterfaceBtn" class="background-view-btn restore-interface hidden" type="button" aria-label="Показать интерфейс" title="Показать интерфейс">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>
+  </button>
+
+  <header class="header">
+    <div class="brand-logo"><span>🌸</span></div>
+    <div class="brand-text">
+      <h1>Sakura Stream</h1>
+      <p id="tagline" class="tagline">музыка под лепестками</p>
+    </div>
+    <button id="popoutBtn" class="settings-btn" title="Отдельное окно плеера" style="margin-right: 8px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
+        <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+      </svg>
+    </button>
+    <button id="settingsBtn" class="settings-btn" title="Оформление и настройки" aria-label="Настройки">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+    </button>
+  </header>
+
+  <main class="container">
+    <!-- ГЛАВНЫЙ ЭКРАН -->
+    <div id="mainView">
+      <!-- Плеер -->
+      <section id="player" class="card player">
+        <button id="backgroundViewBtn" class="background-view-btn" type="button" aria-label="Показать фон" title="Показать фон">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="8" cy="9" r="1.5"/><path d="m4 18 5-5 3 3 3-4 5 6"/></svg>
+        </button>
+        <div class="now">
+          <div class="cover-wrap">
+            <img id="nowCover" class="cover" alt="">
+          </div>
+          <div class="now-info">
+            <div id="nowLabel" class="now-label">Сейчас играет</div>
+            <div id="nowName" class="now-name">Ничего не играет</div>
+            <div class="now-track-row">
+              <div id="nowTrack" class="now-track" title="Нажмите, чтобы скопировать"><span></span></div>
+              <button id="copyBtn" class="copy-btn hidden" title="Скопировать название трека" aria-label="Скопировать">⧉</button>
+            </div>
+            <div id="eq" class="eq">
+              <span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+          <button id="mainPlayBtn" class="btn-play main-play-btn" type="button" aria-label="Включить">▶</button>
+        </div>
+
+        <div class="volume-row">
+          <button id="muteBtn" class="icon-btn mute-btn" title="Выключить звук">🔊</button>
+          <input type="range" id="volume" class="volume-slider" min="0" max="100" value="80">
+          <span id="volumeVal" class="volume-val">80%</span>
+        </div>
+
+        <!-- Таймер сна -->
+        <div class="volume-row timer-row" style="margin-top: 4px;">
+          <span id="timerLabel" style="font-size:12px; color:var(--muted); margin-left: 4px;">⏱ Таймер:</span>
+          <select id="sleepSelect" class="sleep-select">
+            <option id="timerOption5" value="5">5 минут</option>
+            <option id="timerOption15" value="15">15 минут</option>
+            <option id="timerOption30" value="30">30 минут</option>
+            <option id="timerOption45" value="45">45 минут</option>
+            <option id="timerOption60" value="60">1 час</option>
+            <option id="timerOption90" value="90">1 ч 30 мин</option>
+            <option id="timerOption120" value="120">2 часа</option>
+          </select>
+          <button id="sleepBtn" class="btn-sleep">Старт</button>
+        </div>
+      </section>
+
+      <!-- Папка основных радиостанций -->
+      <section class="station-folder">
+        <button id="stationsFolderBtn" class="section-title folder-toggle" type="button" aria-expanded="true" aria-controls="stationsList">
+          <span id="stationsFolderLabel">📻 Основные станции</span><span id="folderChevron" class="folder-chevron">⌄</span>
+        </button>
+        <div id="stationsList" class="stations-list"></div>
+      </section>
+
+      <button id="toggleFormBtn" class="btn-primary">+ Добавить станцию</button>
+
+      <!-- Форма добавления / редактирования -->
+      <form id="addForm" class="card add-form hidden">
+        <h2 id="formTitle">Новая станция</h2>
+
+        <div class="input-group">
+          <label id="stationNameLabel" for="stationName">Название</label>
+          <input type="text" id="stationName" placeholder="Например, Lo-fi Sakura" required>
+        </div>
+
+        <div class="input-group">
+          <label id="streamLabel" for="streamUrl">Ссылка на поток</label>
+          <input type="url" id="streamUrl" placeholder="https://..." required>
+        </div>
+
+        <div class="input-group">
+          <label id="iconLabel" for="iconUrl">Картинка или GIF (необязательно)</label>
+          <input type="url" id="iconUrl" placeholder="https://...">
+        </div>
+
+        <div class="input-group">
+          <label id="programLabel" for="programUrl">Ссылка на программу / JSON с треком (необязательно)</label>
+          <input type="url" id="programUrl" placeholder="https://...">
+        </div>
+
+        <div class="form-actions">
+          <button id="saveLabel" type="submit" class="btn-save">Сохранить</button>
+          <button type="button" id="cancelBtn" class="btn-cancel"><span id="cancelLabel">Отмена</span></button>
+        </div>
+      </form>
+    </div>
+
+    <!-- ЭКРАН НАСТРОЕК -->
+    <div id="settingsView" class="hidden">
+      <div class="card settings">
+        <div class="language-setting">
+          <div class="language-heading"><span class="language-icon" aria-hidden="true">文</span><span id="languageLabel">Язык интерфейса</span></div>
+          <div id="languageOptions" class="language-options" role="group" aria-labelledby="languageLabel">
+            <button type="button" class="language-option" data-language="ru" aria-pressed="true"><span class="language-code">RU</span><span>Русский</span></button>
+            <button type="button" class="language-option" data-language="en" aria-pressed="false"><span class="language-code">EN</span><span>English</span></button>
+            <button type="button" class="language-option" data-language="ja" aria-pressed="false"><span class="language-code">JP</span><span>日本語</span></button>
+          </div>
+        </div>
+        <h2 id="themeHeading">Темы</h2>
+        <div class="theme-grid" id="themeGrid"></div>
+
+        <div class="row">
+          <span id="bgColorLabel">Цвет фона (Своя)</span>
+          <input type="color" id="customBg" value="#1a1030">
+        </div>
+
+        <div class="row">
+          <span id="accentColorLabel">Цвет акцента (Своя)</span>
+          <input type="color" id="customAccent" value="#ff8fd0">
+        </div>
+
+        <div class="input-group">
+          <label id="bgImageLabel" for="customImg">Фон (URL изображения или GIF)</label>
+          <div class="background-url-field">
+            <input type="url" id="customImg" placeholder="https://...">
+            <span id="localBgStatus" class="local-background-status" hidden></span>
+            <button type="button" id="clearBgImage" class="clear-background" aria-label="Удалить фон" title="Удалить фон">×</button>
+          </div>
+          <button type="button" id="bgHelpBtn" class="help-link">Как это сделать?</button>
+          <label id="chooseGifLabel" class="file-picker" for="customGifFile">Или выбрать GIF с устройства</label>
+          <input type="file" id="customGifFile" accept="image/gif,image/*" hidden>
+        </div>
+
+        <h2 id="effectsHeading">Эффекты</h2>
+        <div class="fx-grid" id="fxGrid"></div>
+
+        <!-- История -->
+        <h2 id="historyHeading">История треков</h2>
+        <div id="historyList" class="history-list">
+          <p id="historyEmpty" class="empty-msg" style="font-size:12px;">История пуста...</p>
+        </div>
+        <button id="clearHistoryBtn" class="btn-cancel btn-wide" style="margin-top: 10px; font-size: 12px;">Очистить историю</button>
+
+        <button id="restoreStationsBtn" class="btn-cancel btn-wide" style="margin-top: 16px;">Вернуть станции по умолчанию</button>
+        <button id="resetThemeBtn" class="btn-cancel btn-wide">Сбросить оформление</button>
+      </div>
+    </div>
+
+    <div id="bgHelpView" class="card bg-help hidden">
+      <h2 id="bgHelpTitle" tabindex="-1">🌸 Мизу-тян подсказывает: 🌸</h2>
+      <ol><li id="bgHelpStep1"></li><li id="bgHelpStep2"></li><li id="bgHelpStep3"></li></ol>
+      <p id="bgHelpHint"></p>
+      <button type="button" id="bgHelpBack" class="btn-cancel"></button>
+    </div>
+
+    <!-- Подвал с автором -->
+    <footer class="footer">
+        <div class="footer-author"><span id="footerCreated">Создал</span> <a class="author-name" href="https://shikimori.io/~Mizu~No~Kami~" target="_blank" rel="noopener noreferrer">~Mizu~No~Kami~</a> <span id="footerLove">с любовью</span> <span class="heart">❤️</span></div>
+      <div class="footer-version">v1.6.3</div>
+    </footer>
+  </main>
+
+  <script src="popup.js"></script>
+</body>
+</html>
