@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Sakura Stream",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "minimum_chrome_version": "116",
   "description": "Sakura Stream — радиоплеер с любыми потоками, фоновым воспроизведением, названиями треков и красивыми темами.",
   "action": {
