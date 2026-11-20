@@ -442,6 +442,13 @@ $('sleepSelect').addEventListener('change', async () => {
 });
 
 chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local' && changes.radioSettings) {
+    settings = { ...settings, ...(changes.radioSettings.newValue || {}) };
+    updateVolumeUI();
+  }
+});
+
+chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== 'session' || !changes.sleepEndTime) return;
   sleepEndTime = changes.sleepEndTime.newValue || null;
   updateSleepUI();
@@ -873,7 +880,23 @@ chrome.runtime.onMessage.addListener((message) => {
       if (message.id === currentlyPlayingId) { if (message.playing) { markStationOnline(message.id); cancelAutoSwitch(); statusText = message.text || ''; updateNowPlaying(); renderStations(); } else if (!isAutoSwitching) { statusText = message.text || ''; } renderTrack(); }
       break;
     case 'SLEEP_TIMER_FIRED':
-      stopPlayback();
+      cancelAutoSwitch();
+      currentlyPlayingId = null;
+      track = '';
+      statusText = '';
+      sleepEndTime = null;
+      updateSleepUI();
+      updateNowPlaying();
+      renderStations();
+      break;
+    case 'SHORTCUT_PLAYBACK_CHANGED':
+      cancelAutoSwitch();
+      currentlyPlayingId = message.id;
+      track = '';
+      statusText = '';
+      if (!message.id) { sleepEndTime = null; updateSleepUI(); }
+      updateNowPlaying();
+      renderStations();
       break;
   }
 });

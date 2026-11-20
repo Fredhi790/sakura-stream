@@ -27,6 +27,8 @@ Sakura Stream is a browser extension for listening to internet radio in a custom
 
 ### Getting started
 
+Keyboard shortcuts work while the popup is closed: Ctrl+Shift+1 toggles playback, Ctrl+Shift+2 selects the next station, Ctrl+Shift+3 the previous station, and Ctrl+Shift+4 increases volume. Assign a shortcut for decreasing volume or change these shortcuts in your browser’s extension shortcuts settings (chrome://extensions/shortcuts). Browser and system shortcut conflicts may require reassignment.
+
 Select a station and press its play button. To add one, choose **Add station**, enter its name and direct stream URL, and optionally provide an image URL and a program or track metadata URL. Save the station; its edit and delete controls are available in the station list. Stream formats and metadata availability depend on the station and browser.
 
 Open **Appearance and settings** to customize the player, change the language, view history, or restore defaults. To use an online image or GIF, right-click it in your browser, choose **Copy image address**, and paste the direct image URL into the background field. A direct image URL does not need a file extension; a link to a webpage will not work. Alternatively, choose an image from your device. Use × to remove the current background.
@@ -36,6 +38,8 @@ Open **Appearance and settings** to customize the player, change the language, v
 The extension uses storage for settings, stations, and history; an offscreen document for background audio; alarms for the sleep timer; clipboard access for copying track titles; and network access to station streams, metadata, and images. It also uses declarative network request rules for compatible network requests.
 
 ## Русский
+
+Горячие клавиши работают при закрытом окне расширения: Ctrl+Shift+1 — включить или остановить радио, Ctrl+Shift+2 — следующая станция, Ctrl+Shift+3 — предыдущая, Ctrl+Shift+4 — увеличить громкость. Клавишу для уменьшения громкости и другие сочетания можно назначить в настройках быстрых клавиш расширений браузера (chrome://extensions/shortcuts). При конфликте с другими сочетаниями их можно изменить.
 
 Sakura Stream — расширение для прослушивания интернет-радио с настраиваемым плеером. Воспроизведение продолжается после закрытия окна расширения, поэтому музыку можно слушать во время работы в браузере.
 
@@ -96,3 +100,11 @@ Sakura Stream は、インターネットラジオを好みの見た目のプレ
 ### 権限
 
 設定・放送局・履歴の保存にストレージ、バックグラウンド再生にオフスクリーンドキュメント、スリープタイマーにアラーム、曲名のコピーにクリップボード、ストリーム・放送局情報・画像の取得にネットワークアクセスを使用します。また、ネットワークリクエストの互換性のために declarative network request ルールを使用します。
+
+### Публикация новой версии
+
+1. Обновите `version` в `manifest.json` и отправьте изменения в репозиторий GitHub.
+2. На GitHub откройте **Releases → Draft a new release** и создайте тег версии, например `v1.6.4`, на коммите с обновлёнными файлами.
+3. Опубликуйте релиз кнопкой **Publish release**. GitHub Actions соберёт `sakura-stream.zip` и прикрепит его к релизу. Ход сборки можно посмотреть на вкладке **Actions**.
+
+При добавлении новых файлов расширения включите их в список файлов в `.github/workflows/release.yml`.

@@ -63,13 +63,60 @@ function notify(msg) {
   return chrome.runtime.sendMessage(msg).catch(() => null);
 }
 
+async function startPlayback(message) {
+  await ensureOffscreen();
+  await chrome.storage.session.set({ playingId: message.id });
+  await chrome.storage.session.remove(['track', 'trackId']);
+  setBadge(true);
+  await notify({ action: 'PLAY_AUDIO', id: message.id, url: message.url,
+    programUrl: message.programUrl || '', volume: message.volume });
+}
+
+async function stopPlayback() {
+  await chrome.alarms.clear('sleepTimer');
+  await chrome.storage.session.remove(['playingId', 'track', 'trackId', 'sleepEndTime']);
+  setBadge(false);
+  if (await hasOffscreen()) await notify({ action: 'STOP_AUDIO', fade: true });
+}
+
+// Serialize shortcuts so rapid key presses use the latest state.
+let commandQueue = Promise.resolve();
+chrome.commands.onCommand.addListener(command => {
+  commandQueue = commandQueue.then(async () => {
+    const { radioStations = [], radioSettings = {} } = await chrome.storage.local.get(['radioStations', 'radioSettings']);
+    const { playingId } = await chrome.storage.session.get('playingId');
+    if (command === 'volume-up' || command === 'volume-down') {
+      const current = Number.isFinite(radioSettings.volume) ? radioSettings.volume : 80;
+      const volume = Math.max(0, Math.min(100, current + (command === 'volume-up' ? 10 : -10)));
+      const settings = { ...radioSettings, volume, muted: volume === 0 };
+      await chrome.storage.local.set({ radioSettings: settings });
+      if (await hasOffscreen()) await notify({ action: 'SET_VOLUME', volume: volume / 100 });
+      return;
+    }
+    if (command === 'toggle-playback' && playingId) {
+      await stopPlayback();
+      await notify({ action: 'SHORTCUT_PLAYBACK_CHANGED', id: null });
+      return;
+    }
+    if (!radioStations.length) return;
+    const current = radioStations.findIndex(station => station.id === playingId);
+    let index = current < 0 ? 0 : current;
+    if (command === 'next-station' && current >= 0) index = (current + 1) % radioStations.length;
+    if (command === 'previous-station') index = current < 0 ? radioStations.length - 1 : (current - 1 + radioStations.length) % radioStations.length;
+    const station = radioStations[index];
+    await startPlayback({ id: station.id, url: station.streamUrl, programUrl: station.programUrl,
+      volume: radioSettings.muted ? 0 : (radioSettings.volume ?? 80) / 100 });
+    await notify({ action: 'SHORTCUT_PLAYBACK_CHANGED', id: station.id });
+  }).catch(error => console.warn('Shortcut error:', error));
+});
+
 // Слушаем таймер сна
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === 'sleepTimer') {
     await chrome.storage.session.remove(['playingId', 'track', 'trackId', 'sleepEndTime']);
     await notify({ action: 'SLEEP_TIMER_UPDATED', sleepEndTime: null });
     setBadge(false);
-    if (await hasOffscreen()) await notify({ action: 'STOP_AUDIO' });
+    if (await hasOffscreen()) await notify({ action: 'STOP_AUDIO', fade: true });
     // Сообщаем попапу, что таймер сработал
     chrome.runtime.sendMessage({ action: 'SLEEP_TIMER_FIRED' }).catch(() => null);
   }
@@ -79,24 +126,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   (async () => {
     switch (message.action) {
       case 'PLAY':
-        await ensureOffscreen();
-        await chrome.storage.session.set({ playingId: message.id });
-        await chrome.storage.session.remove(['track', 'trackId']);
-        setBadge(true);
-        await notify({
-          action: 'PLAY_AUDIO',
-          id: message.id,
-          url: message.url,
-          programUrl: message.programUrl || '',
-          volume: message.volume
-        });
+        await startPlayback(message);
         return { ok: true };
 
       case 'STOP':
-        await chrome.alarms.clear('sleepTimer'); // Сбрасываем таймер при стопе
-        await chrome.storage.session.remove(['playingId', 'track', 'trackId', 'sleepEndTime']);
-        setBadge(false);
-        if (await hasOffscreen()) await notify({ action: 'STOP_AUDIO' });
+        await stopPlayback();
         return { ok: true };
 
       case 'SET_VOLUME':

@@ -308,6 +308,16 @@ chrome.runtime.onMessage.addListener((message) => {
     updateSleepUI();
     updateUI();
   }
+  if (message.action === 'SHORTCUT_PLAYBACK_CHANGED') {
+    currentlyPlayingId = message.id;
+    isPlaying = !!message.id;
+    if (!isPlaying) { sleepEndTime = null; updateSleepUI(); updateUI(); }
+    else chrome.storage.local.get('radioStations').then(({ radioStations = [] }) => {
+      if (currentlyPlayingId !== message.id) return;
+      const station = radioStations.find(item => item.id === message.id);
+      updateUI(station?.name, '', station?.iconUrl, true);
+    });
+  }
   if (message.action === 'SLEEP_TIMER_UPDATED') {
     sleepEndTime = message.sleepEndTime || null;
     updateSleepUI();

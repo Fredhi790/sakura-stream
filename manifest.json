@@ -32,5 +32,38 @@
     "32": "icon32.png",
     "48": "icon48.png",
     "128": "icon128.png"
+  },
+  "commands": {
+    "toggle-playback": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+1"
+      },
+      "global": true,
+      "description": "Play or stop radio"
+    },
+    "next-station": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+2"
+      },
+      "global": true,
+      "description": "Next station"
+    },
+    "previous-station": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+3"
+      },
+      "global": true,
+      "description": "Previous station"
+    },
+    "volume-up": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+4"
+      },
+      "global": true,
+      "description": "Increase volume"
+    },
+    "volume-down": {
+      "description": "Decrease volume"
+    }
   }
 }

@@ -2,6 +2,25 @@ const player = document.getElementById('radioPlayer');
 
 const CONNECT_TIMEOUT = 15000; // 15 секунд на подключение
 const META_INTERVAL = 20000;
+const FADE_DURATION = 800;
+let fadeGeneration = 0;
+let transitioning = false;
+
+function fadeTo(target, duration = FADE_DURATION) {
+  const generation = ++fadeGeneration;
+  const start = player.volume;
+  const started = performance.now();
+  return new Promise(resolve => {
+    function step() {
+      if (generation !== fadeGeneration) return resolve(false);
+      const progress = Math.min(1, (performance.now() - started) / duration);
+      player.volume = Math.max(0, Math.min(1, start + (target - start) * progress));
+      if (progress < 1) setTimeout(step, 30);
+      else resolve(true);
+    }
+    step();
+  });
+}
 
 const S = {
   station: null,
@@ -47,6 +66,7 @@ function cleanupStream() {
 }
 
 function stopAll() {
+  fadeGeneration++;
   S.token++;
   S.station = null;
   S.playing = false;
@@ -80,7 +100,7 @@ async function startAttempt() {
   try {
     if (cand.mode === 'direct') {
       player.src = cand.url;
-      player.volume = S.volume;
+      player.volume = 0;
       await player.play();
     } else {
       await playViaMse(cand.url, token);
@@ -116,6 +136,7 @@ player.addEventListener('playing', () => {
   if (!S.playing) {
     S.playing = true;
     S.retries = 0;
+    if (!transitioning) fadeTo(S.volume);
     const cand = S.candidates[S.idx];
     status(cand ? cand.note : '');
   }
@@ -163,7 +184,7 @@ async function playViaMse(url, token) {
   const ms = new MediaSource();
   S.objUrl = URL.createObjectURL(ms);
   player.src = S.objUrl;
-  player.volume = S.volume;
+  player.volume = 0;
 
   await new Promise((resolve, reject) => {
     ms.addEventListener('sourceopen', resolve, { once: true });
@@ -506,10 +527,17 @@ function stopMeta() {
   S.lastTrack = '';
 }
 
-function play(m) {
+async function play(m) {
+  transitioning = true;
+  ++fadeGeneration;
+  if (S.station && !player.paused) {
+    if (!await fadeTo(0)) return;
+  }
+  stopAll();
+  transitioning = false;
   stopMeta();
   if (typeof m.volume === 'number') S.volume = m.volume;
-  player.volume = S.volume;
+  player.volume = 0;
   S.station = { id: m.id, url: m.url, programUrl: m.programUrl || '' };
   S.candidates = buildCandidates(m.url);
   S.idx = 0;
@@ -524,13 +552,16 @@ chrome.runtime.onMessage.addListener((message) => {
       break;
 
     case 'STOP_AUDIO':
-      stopAll();
+      transitioning = true;
+      if (message.fade && S.station && !player.paused) {
+        fadeTo(0).then(completed => { if (completed) { stopAll(); transitioning = false; } });
+      } else { stopAll(); transitioning = false; }
       break;
 
     case 'SET_VOLUME':
       if (typeof message.volume === 'number') {
         S.volume = message.volume;
-        player.volume = message.volume;
+        if (!player.paused && !transitioning) fadeTo(S.volume, 150);
       }
       break;
   }
